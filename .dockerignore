@@ -1,0 +1,12 @@
+backend/
+frontend/
+database/
+tests/
+**/tests/
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+models/
+**/target/
+.env
+.env.*

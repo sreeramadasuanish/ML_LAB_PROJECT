@@ -1,0 +1,1 @@
+"""MoneyMate transaction categorization prototype."""
