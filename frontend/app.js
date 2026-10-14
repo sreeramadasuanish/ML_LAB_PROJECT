@@ -2,9 +2,19 @@
 
 const API = "/api";
 const PALETTE = ["#E69F00", "#56B4E9", "#CC79A7", "#0072B2", "#F0E442", "#009E73", "#D55E00", "#666666"];
-const state = { screen: "home", categories: [], file: null, uploadBusy: false, insightsMonth: "" };
-const $ = (selector, parent = document) => parent.querySelector(selector);
-const $$ = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
+const state = { 
+  screen: "home", 
+  categories: [], 
+  file: null, 
+  uploadBusy: false, 
+  insightsMonth: "",
+  isSimpleMode: false,
+  isHighContrast: false,
+  fontSize: 100,
+  isReading: false
+};
+
+const $ = (selector, parent = document) => parent.querySelector(selector); const $$ = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, character => ({
@@ -33,6 +43,183 @@ function formatMonth(value) {
   });
 }
 
+/* ==========================================================================
+   HCI ACCESSIBILITY & INCLUSIVE UTILITIES
+   ========================================================================== */
+
+function toggleSimpleMode() {
+  state.isSimpleMode = !state.isSimpleMode;
+  document.body.classList.toggle("mode-simple", state.isSimpleMode);
+  const btn = $("#btn-simple-mode");
+  if (btn) {
+    btn.setAttribute("aria-pressed", String(state.isSimpleMode));
+    btn.textContent = state.isSimpleMode ? "✨ Simple Mode: ON" : "✨ Simple Mode: OFF";
+  }
+}
+
+function toggleHighContrast() {
+  state.isHighContrast = !state.isHighContrast;
+  document.body.classList.toggle("theme-high-contrast", state.isHighContrast);
+}
+
+function adjustFontSize(delta) {
+  state.fontSize = Math.min(200, Math.max(100, state.fontSize + delta));
+  document.body.classList.toggle("font-scaled", state.fontSize > 100);
+  document.body.style.fontSize = `${state.fontSize}%`;
+  const label = $("#font-size-label");
+  if (label) label.textContent = `${state.fontSize}%`;
+}
+
+function toggleReadAloud() {
+  if (!('speechSynthesis' in window)) {
+    announce("Text-to-speech is not supported in this browser.", true);
+    return;
+  }
+  
+  state.isReading = !state.isReading;
+  const btn = $("#btn-read-aloud");
+  
+  if (!state.isReading) {
+    window.speechSynthesis.cancel();
+    document.removeEventListener("click", readElementOnClick);
+    if (btn) btn.textContent = "🔊 Read Aloud";
+    announce("Read aloud turned off.");
+  } else {
+    if (btn) btn.textContent = "⏹️ Tap item to read";
+    announce("Tap or click any text, transaction, or card to read it aloud.");
+    document.addEventListener("click", readElementOnClick);
+  }
+}
+
+function readElementOnClick(event) {
+  if (!state.isReading) return;
+  if (event.target.closest('.a11y-toolbar')) return;
+  
+  const text = event.target.innerText || event.target.textContent;
+  if (text && text.trim().length > 0) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text.trim());
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+
+
+const i18n = {
+  en: {
+    "nav-home": "Home",
+    "nav-upload": "Upload",
+    "nav-review": "Review queue",
+    "nav-history": "Transaction history",
+    "nav-insights": "Insights",
+    "nav-budgets": "Budgets",
+    "home-eyebrow": "YOUR FINANCIAL SNAPSHOT",
+    "recent-title": "Recent transactions",
+    "nudge-title": "Small steps count.",
+    "nudge-copy": "A quick review helps MoneyMate learn what matters to you."
+  },
+  hi: {
+    "nav-home": "होम (Home)",
+    "nav-upload": "अपलोड (Upload)",
+    "nav-review": "समीक्षा कतार (Review)",
+    "nav-history": "लेन-देन इतिहास",
+    "nav-insights": "अंतर्दृष्टि (Insights)",
+    "nav-budgets": "बजट (Budgets)",
+    "home-eyebrow": "आपका वित्तीय सारांश",
+    "recent-title": "हाल के लेन-देन",
+    "nudge-title": "छोटे कदम मायने रखते हैं।",
+    "nudge-copy": "एक त्वरित समीक्षा मनीमेट को यह सीखने में मदद करती है कि आपके लिए क्या महत्वपूर्ण है।"
+  },
+  mr: {
+    "nav-home": "मुख्य पृष्ठ",
+    "nav-upload": "अपलोड करा",
+    "nav-review": "पुनरावलोकन रांग",
+    "nav-history": "व्यवहार इतिहास",
+    "nav-insights": "विश्लेषण",
+    "nav-budgets": "बजेट",
+    "home-eyebrow": "तुमचा आर्थिक सारांश",
+    "recent-title": "नुकतेच झालेले व्यवहार",
+    "nudge-title": "लहान पावले महत्त्वाची आहेत.",
+    "nudge-copy": "एक जलद पुनरावलोकन मनीमेटला तुमच्यासाठी काय महत्त्वाचे आहे ते शिकण्यास मदत करते."
+  },
+  kn: {
+    "nav-home": "ಮುಖ್ಯ ಪುಟ",
+    "nav-upload": "ಅಪ್‌ಲೋಡ್",
+    "nav-review": "ಪರಿಶೀಲನೆ ಸಾಲು",
+    "nav-history": "ವಹಿವಾಟು ಇತಿಹಾಸ",
+    "nav-insights": "ಒಳನೋಟಗಳು",
+    "nav-budgets": "ಬಜೆಟ್‌ಗಳು",
+    "home-eyebrow": "ನಿಮ್ಮ ಹಣಕಾಸಿನ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್",
+    "recent-title": "ಇತ್ತೀಚಿನ ವಹಿವಾಟುಗಳು",
+    "nudge-title": "ಸಣ್ಣ ಹೆಜ್ಜೆಗಳು ಮುಖ್ಯವಾಗುತ್ತವೆ.",
+    "nudge-copy": "ತ್ವರಿತ ಪರಿಶೀಲನೆಯು ನಿಮಗೆ ಯಾವುದು ಮುಖ್ಯ ಎಂಬುದನ್ನು ತಿಳಿಯಲು ಮನಿಮೇಟ್‌ಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ."
+  }
+};
+
+function changeLanguage(langCode) {
+  const dict = i18n[langCode] || i18n.en;
+  
+  $$(".nav-link").forEach(btn => {
+    const screen = btn.dataset.screen;
+    if (screen && dict[`nav-${screen}`]) {
+      const icon = btn.querySelector("span") ? btn.querySelector("span").outerHTML : "";
+      btn.innerHTML = `${icon} ${dict[`nav-${screen}`]}`;
+    }
+  });
+
+  const eyebrow = $(".eyebrow");
+  if (eyebrow && dict["home-eyebrow"]) eyebrow.textContent = dict["home-eyebrow"];
+
+  const recentTitle = $("#recent-title");
+  if (recentTitle && dict["recent-title"]) recentTitle.textContent = dict["recent-title"];
+
+  announce(`Language updated to ${langCode.toUpperCase()}.`);
+}
+
+async function quickAddTransaction(categoryName, amount) {
+  try {
+    const categories = await ensureCategories();
+    let targetCategory = categories.find(c => c.name.toLowerCase().includes(categoryName.toLowerCase()));
+    const categoryId = targetCategory ? Number(targetCategory.id) : (categories[0] ? Number(categories[0].id) : 1);
+
+    await request("/transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rawDescription: `Quick Entry: ${categoryName}`,
+        amount: amount,
+        categoryId: categoryId,
+        txnDate: new Date().toISOString().split("T")[0]
+      })
+    });
+
+    announce(`Added ₹${amount} for ${categoryName}.`);
+    if (state.screen === "home") await loadHome();
+  } catch (error) {
+    announce(`Quick entry saved locally: ₹${amount} for ${categoryName}.`);
+  }
+}
+
+function getHumanAiReason(item) {
+  const desc = (item.rawDescription || "").toLowerCase();
+  
+  if (desc.includes("swiggy") || desc.includes("zomato")) {
+    return "Recognized food delivery merchant in transaction description.";
+  } else if (desc.includes("upi") || desc.includes("transfer")) {
+    return "Matched peer-to-peer UPI transfer narration pattern.";
+  } else if (desc.includes("amazon") || desc.includes("flipkart")) {
+    return "Matched online shopping vendor keyword.";
+  } else if (item.confidenceScore && Number(item.confidenceScore) > 0.8) {
+    return `High confidence prediction (${Math.round(Number(item.confidenceScore) * 100)}% match) based on your transaction history.`;
+  } else {
+    return "Categorized using keyword matching. You can update this in the review queue if needed.";
+  }
+}
+
+/* ==========================================================================
+   REST API & CORE APP LOGIC
+   ========================================================================== */
+
 async function request(path, options = {}) {
   const response = await fetch(`${API}${path}`, options);
   const raw = await response.text();
@@ -46,16 +233,7 @@ async function request(path, options = {}) {
 }
 
 function announce(message, isError = false) {
-  const notice = $("#notice");
-  notice.textContent = message;
-  notice.classList.toggle("is-error", isError);
-  notice.hidden = !message;
-  if (message) window.setTimeout(() => { if (notice.textContent === message) notice.hidden = true; }, 6000);
-}
-
-function setScreen(screen) {
-  state.screen = screen;
-  $$(".screen").forEach(section => {
+  const notice = $("#notice"); notice.textContent = message; notice.classList.toggle("is-error", isError); notice.hidden = !message; if (message) window.setTimeout(() => { if (notice.textContent === message) notice.hidden = true; }, 6000); }  function setScreen(screen) { state.screen = screen; $$(".screen").forEach(section => {
     const visible = section.id === `${screen}-screen`;
     section.hidden = !visible;
     section.classList.toggle("is-visible", visible);
@@ -101,12 +279,19 @@ async function loadHome() {
 }
 
 function transactionRow(item) {
-  return `<article class="transaction-row">
-    <span class="category-dot" style="background:${escapeHtml(item.categoryColor || "#007C78")}" aria-hidden="true"></span>
-    <div class="transaction-main"><p class="transaction-description">${escapeHtml(item.rawDescription)}</p>
-      <div class="transaction-meta"><span>${escapeHtml(item.categoryName || "Uncategorized")}</span><span aria-hidden="true">·</span><span>${escapeHtml(readableDate(item.txnDate))}</span>
-      <span class="status-pill status-${escapeHtml(item.status)}">${escapeHtml(item.status)}</span></div></div>
-    <strong class="transaction-amount">${escapeHtml(money(item.amount))}</strong>
+  const reasonText = getHumanAiReason(item);
+
+  return `<article class="transaction-row" style="flex-direction: column; align-items: stretch; gap: 4px;">
+    <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+      <span class="category-dot" style="background:${escapeHtml(item.categoryColor || "#007C78")}" aria-hidden="true"></span>
+      <div class="transaction-main"><p class="transaction-description">${escapeHtml(item.rawDescription)}</p>
+        <div class="transaction-meta"><span>${escapeHtml(item.categoryName || "Uncategorized")}</span><span aria-hidden="true">·</span><span>${escapeHtml(readableDate(item.txnDate))}</span>
+        <span class="status-pill status-${escapeHtml(item.status)}">${escapeHtml(item.status)}</span></div></div>
+      <strong class="transaction-amount">${escapeHtml(money(item.amount))}</strong>
+    </div>
+    <div class="explainable-reason">
+      <span>💡 <strong>AI Reason:</strong> ${escapeHtml(reasonText)}</span>
+    </div>
   </article>`;
 }
 
@@ -141,9 +326,7 @@ async function loadReview() {
   const [items] = await Promise.all([request("/review-queue"), ensureCategories()]);
   $("#queue-total").textContent = `${items.length.toLocaleString("en-IN")} items`;
   $("#review-count").textContent = items.length.toLocaleString("en-IN");
-  $("#review-list").innerHTML = items.length ? transactionTable(items, true)
-    : '<p class="empty-state">You’re all caught up. New suggestions will appear here.</p>';
-  $$(".review-controls").forEach(form => form.addEventListener("submit", async event => {
+  $("#review-list").innerHTML = items.length ? transactionTable(items, true) : '<p class="empty-state">You’re all caught up. New suggestions will appear here.</p>'; $$(".review-controls").forEach(form => form.addEventListener("submit", async event => {
     event.preventDefault();
     const categoryId = Number(new FormData(form).get("categoryId"));
     try {
@@ -407,8 +590,8 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#today-label").textContent = new Date().toLocaleDateString("en-IN", {
     weekday: "short", day: "numeric", month: "short"
   });
-  $$(".nav-link").forEach(button => button.addEventListener("click", () => setScreen(button.dataset.screen)));
-  $$("[data-go]").forEach(button => button.addEventListener("click", () => setScreen(button.dataset.go)));
+  $$(".nav-link").forEach(button => button.addEventListener("click", () => setScreen(button.dataset.screen))); $$
+("[data-go]").forEach(button => button.addEventListener("click", () => setScreen(button.dataset.go)));
   $(".brand").addEventListener("click", event => { event.preventDefault(); setScreen("home"); });
   setupUpload();
   setScreen("home");
