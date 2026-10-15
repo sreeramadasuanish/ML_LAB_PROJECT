@@ -190,3 +190,165 @@ tr:last-child td { border-bottom: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* ==========================================================================
+   FIXED ACCESSIBILITY, FONT RESIZING & HIGH CONTRAST STYLES
+   ========================================================================== */
+
+/* Accessibility Top Bar */
+.a11y-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 48px;
+  background: #ebf0ec;
+  border-bottom: 1px solid #d8e2dc;
+  font-size: 11px;
+}
+
+.a11y-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.a11y-btn, .a11y-select {
+  min-height: 38px;
+  padding: 4px 10px;
+  border: 1px solid #c4d4cc;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.a11y-btn:hover, .a11y-select:hover {
+  background: var(--teal-soft);
+  border-color: var(--teal);
+}
+
+.font-indicator {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 38px;
+  text-align: center;
+}
+
+/* Simple Mode UI Scaler */
+body.mode-simple {
+  font-size: 125%;
+}
+
+body.mode-simple button,
+body.mode-simple input,
+body.mode-simple select,
+body.mode-simple .nav-link {
+  min-height: 48px !important;
+  font-size: 14px !important;
+}
+
+body.mode-simple h1 {
+  font-size: 42px !important;
+}
+
+body.mode-simple .stat-value {
+  font-size: 38px !important;
+}
+
+/* Font Resizing Trigger */
+body.font-scaled h1, 
+body.font-scaled h2, 
+body.font-scaled p, 
+body.font-scaled span, 
+body.font-scaled button, 
+body.font-scaled td, 
+body.font-scaled th,
+body.font-scaled label {
+  font-size: 1.15em !important;
+}
+
+/* High Contrast Mode - Keeps cards, charts, and borders visible */
+body.theme-high-contrast {
+  --canvas: #0a0a0a !important;
+  --paper: #181818 !important;
+  --ink: #ffffff !important;
+  --muted: #d0d0d0 !important;
+  --line: #ffffff !important;
+  --teal: #ffff00 !important;
+  --teal-dark: #ffff00 !important;
+  --teal-soft: #262600 !important;
+  --marigold-soft: #332b00 !important;
+  --shadow: none !important;
+}
+
+body.theme-high-contrast .panel,
+body.theme-high-contrast .stat-card,
+body.theme-high-contrast .transaction-row,
+body.theme-high-contrast .sidebar {
+  border: 2px solid #ffffff !important;
+  background-color: #121212 !important;
+}
+
+body.theme-high-contrast button {
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+body.theme-high-contrast .button-primary {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+/* Explainable AI Banner */
+.explainable-reason {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--teal-soft);
+  border-radius: 6px;
+  color: var(--teal-dark);
+  font-size: 10px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* One-Tap Quick Log Bar */
+.quick-log-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.quick-log-btn {
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-log-btn:hover {
+  background: var(--teal-soft);
+  border-color: var(--teal);
+}
+
+@media (max-width: 760px) {
+  .a11y-toolbar {
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
