@@ -14,16 +14,16 @@ import pandas as pd
 from pydantic import BaseModel, Field
 from sklearn.pipeline import Pipeline
 
-from MLproject.generate_data import generate_synthetic_transactions
-from MLproject.jaccard_cache import JaccardCache
-from MLproject.preprocess import normalize_description
-from MLproject.router import classify_transaction
-from MLproject.train import train_model
+from generate_data import generate_synthetic_transactions
+from jaccard_cache import JaccardCache
+from preprocess import normalize_description
+from router import classify_transaction
+from train import train_model
 
 MODEL_PATH = Path(os.getenv(
     "MODEL_PATH",
     Path(__file__).resolve().parents[1] / "models" / "moneymate_decision_tree.joblib",
-))
+    ))
 TRAIN_SAMPLES = int(os.getenv("TRAIN_SAMPLES", "1200"))
 _lock = RLock()
 _model: Pipeline | None = None
@@ -141,3 +141,48 @@ def retrain(request: RetrainRequest | None = None) -> dict[str, object]:
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
     return {"status": "retrained", "categories": categories}
+
+"""
+"""
+
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
+
+# Define input structure
+class AdvisorRequest(BaseModel):
+    monthly_income: float = Field(ge=0)
+    savings_goal: float = Field(ge=0)
+    total_budget: float = Field(ge=0)
+    current_spent: float = Field(ge=0)
+    category_spendings: dict[str, float] = {}
+
+@app.post("/friendly-advice")
+def friendly_advice(request: AdvisorRequest) -> dict[str, object]:
+    remaining_budget = request.total_budget - request.current_spent
+    projected_savings = request.monthly_income - request.current_spent
+
+    advice = []
+
+    # Check 1: Budget Alert
+    if request.current_spent > request.total_budget:
+        over_budget = request.current_spent - request.total_budget
+        advice.append(f"⚠️ **Alert:** You are ${over_budget:.2f} over your overall monthly budget limit!")
+
+    # Check 2: Savings Goal Advice
+    if projected_savings < request.savings_goal:
+        deficit = request.savings_goal - projected_savings
+        advice.append(f"💡 **Suggestion:** You are short of your savings goal by ${deficit:.2f}. Trim non-essential expenses to get back on track.")
+    else:
+        advice.append("✨ **Awesome!** You are fully on track to hit your monthly savings target.")
+
+    # Check 3: Category Spending Analysis
+    if request.category_spendings:
+        highest_cat = max(request.category_spendings, key=request.category_spendings.get)
+        highest_amt = request.category_spendings[highest_cat]
+        advice.append(f"🔍 **Friendly Tip:** Your highest expense this month is **{highest_cat}** (${highest_amt:.2f}). Cutting back here will give you the biggest boost toward your savings target.")
+
+    return {
+        "remainingBudget": round(remaining_budget, 2),
+        "projectedSavings": round(projected_savings, 2),
+        "adviceList": advice
+    }

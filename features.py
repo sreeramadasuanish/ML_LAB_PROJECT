@@ -1,3 +1,4 @@
+
 """Feature preparation and classifier preprocessing for MoneyMate."""
 
 from __future__ import annotations
@@ -10,9 +11,10 @@ from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from MLproject.preprocess import normalize_description
+from preprocess import normalize_description
 
 REQUIRED_COLUMNS = {"description", "amount", "date"}
+
 AMOUNT_RANGE_LABELS = (
     "under_500",
     "500_to_1999",
@@ -20,6 +22,7 @@ AMOUNT_RANGE_LABELS = (
     "5000_to_9999",
     "10000_plus",
 )
+
 MERCHANT_CATEGORY_HINTS = {
     "swiggy": "Food & Dining",
     "zomato": "Food & Dining",
@@ -29,6 +32,7 @@ MERCHANT_CATEGORY_HINTS = {
     "ola": "Transport",
     "metro": "Transport",
     "irctc": "Transport",
+    "amazon": "Shopping",
     "flipkart": "Shopping",
     "myntra": "Shopping",
     "store": "Shopping",
@@ -49,30 +53,47 @@ MERCHANT_CATEGORY_HINTS = {
     "medplus": "Health",
     "hospital": "Health",
 }
+
 MERCHANT_HINT_PATTERN = r"\b(" + "|".join(
     sorted(MERCHANT_CATEGORY_HINTS, key=len, reverse=True)
 ) + r")\b"
 
 
 def prepare_features(
-    transactions: Iterable[Mapping[str, Any]] | pd.DataFrame,
+        transactions: Iterable[Mapping[str, Any]] | pd.DataFrame,
 ) -> pd.DataFrame:
-    """Build normalized text, coarse amount-band, and day-of-month features."""
+    """Build normalized text, amount-band, merchant-hint, and date features."""
+
     frame = pd.DataFrame(transactions).copy()
+
     missing_columns = REQUIRED_COLUMNS - set(frame.columns)
     if missing_columns:
         raise ValueError(f"Missing transaction columns: {sorted(missing_columns)}")
+
     if frame.empty:
         raise ValueError("At least one transaction is required")
 
     amounts = pd.to_numeric(frame["amount"], errors="raise")
+
     if (amounts < 0).any():
         raise ValueError("transaction amounts must be non-negative")
+
     dates = pd.to_datetime(frame["date"], errors="raise")
     normalized_text = frame["description"].map(normalize_description)
+
     merchant_hints = normalized_text.str.extract(
-        MERCHANT_HINT_PATTERN, expand=False
+        MERCHANT_HINT_PATTERN,
+        expand=False,
     )
+
+    # Amazon Pay can represent a transfer rather than a shopping purchase.
+    amazon_pay_mask = normalized_text.str.contains(
+        r"\bamazon[\s-]*pay\b",
+        regex=True,
+        na=False,
+    )
+    merchant_hints = merchant_hints.mask(amazon_pay_mask)
+
     category_hints = merchant_hints.map(MERCHANT_CATEGORY_HINTS)
 
     amount_ranges = pd.cut(
@@ -82,6 +103,7 @@ def prepare_features(
         right=False,
         include_lowest=True,
     )
+
     return pd.DataFrame(
         {
             "text": normalized_text,
@@ -94,7 +116,8 @@ def prepare_features(
 
 
 def build_feature_transformer() -> ColumnTransformer:
-    """Combine word/character TF-IDF, amount bands, and scaled day-of-month."""
+    """Combine text, merchant hints, amount bands, and scaled day features."""
+
     return ColumnTransformer(
         transformers=[
             (
@@ -117,8 +140,16 @@ def build_feature_transformer() -> ColumnTransformer:
                 OneHotEncoder(handle_unknown="ignore"),
                 ["merchant_category_hint"],
             ),
-            ("amount_range", OneHotEncoder(handle_unknown="ignore"), ["amount_range"]),
-            ("day_of_month", StandardScaler(), ["day_of_month"]),
+            (
+                "amount_range",
+                OneHotEncoder(handle_unknown="ignore"),
+                ["amount_range"],
+            ),
+            (
+                "day_of_month",
+                StandardScaler(),
+                ["day_of_month"],
+            ),
         ],
         remainder="drop",
     )

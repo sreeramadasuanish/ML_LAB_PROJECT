@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,167 +14,174 @@
   <script src="app.js" defer></script>
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Main navigation">
-      <a class="brand" href="#home" aria-label="MoneyMate home">
-        <span class="brand-mark" aria-hidden="true">m</span>
-        <span>money<span class="brand-light">mate</span></span>
-      </a>
-      <p class="nav-caption">YOUR SPACE</p>
-      <nav class="primary-nav">
-        <button class="nav-link is-active" data-screen="home" aria-current="page"><span aria-hidden="true">⌂</span> Home</button>
-        <button class="nav-link" data-screen="upload"><span aria-hidden="true">↥</span> Upload</button>
-        <button class="nav-link" data-screen="review"><span aria-hidden="true">◎</span> Review queue <span class="nav-count" id="review-count">—</span></button>
-        <button class="nav-link" data-screen="history"><span aria-hidden="true">≋</span> Transaction history</button>
-        <button class="nav-link" data-screen="insights"><span aria-hidden="true">◔</span> Insights</button>
-        <button class="nav-link" data-screen="budgets"><span aria-hidden="true">▤</span> Budgets</button>
-      </nav>
-      <div class="sidebar-note">
-        <span class="note-icon" aria-hidden="true">✳</span>
-        <p>Your money story,<br>without the noise.</p>
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Main navigation">
+    <a class="brand" href="#home" aria-label="MoneyMate home">
+      <span class="brand-mark" aria-hidden="true">m</span>
+      <span>money<span class="brand-light">mate</span></span>
+    </a>
+    <p class="nav-caption">YOUR SPACE</p>
+    <nav class="primary-nav">
+      <button class="nav-link is-active" data-screen="home" aria-current="page"><span>⌂</span> Home</button>
+      <button class="nav-link" data-screen="upload"><span>↥</span> Upload</button>
+      <button class="nav-link" data-screen="review"><span>◎</span> Review queue <span class="nav-count" id="review-count">—</span></button>
+      <button class="nav-link" data-screen="history"><span>≋</span> Transaction history</button>
+      <button class="nav-link" data-screen="insights"><span>◔</span> Insights</button>
+      <button class="nav-link" data-screen="budgets"><span>▤</span> Budgets</button>
+    </nav>
+    <div class="sidebar-note"><span class="note-icon">✳</span><p>Your money story,<br>without the noise.</p></div>
+    <div class="sidebar-footer"><span class="online-dot"></span> Private by design</div>
+  </aside>
+
+  <main class="main-content">
+    <aside aria-label="Accessibility settings" class="a11y-toolbar">
+      <div class="a11y-group">
+        <button id="btn-simple-mode" class="a11y-btn" aria-pressed="false" onclick="toggleSimpleMode()">✨ Simple Mode: OFF</button>
+        <button id="btn-read-aloud" class="a11y-btn" onclick="toggleReadAloud()" aria-label="Read screen aloud">🔊 Read Aloud</button>
       </div>
-      <div class="sidebar-footer"><span class="online-dot" aria-hidden="true"></span> Private by design</div>
+      <div class="a11y-group">
+        <div role="group" aria-label="Font size controls" style="display:flex;align-items:center;gap:4px">
+          <button class="a11y-btn" onclick="adjustFontSize(-10)" aria-label="Decrease text size">A-</button>
+          <span id="font-size-label" class="font-indicator">100%</span>
+          <button class="a11y-btn" onclick="adjustFontSize(10)" aria-label="Increase text size">A+</button>
+        </div>
+        <button id="btn-contrast" class="a11y-btn" onclick="toggleHighContrast()">🌗 Contrast</button>
+        <select id="lang-selector" onchange="changeLanguage(this.value)" aria-label="Interface language" class="a11y-select">
+          <option value="en">English</option>
+          <option value="hi">हिंदी (Hindi)</option>
+          <option value="mr">मराठी (Marathi)</option>
+          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        </select>
+      </div>
     </aside>
 
-    <main class="main-content">
-      <!-- HCI Accessibility & Inclusive Top Toolbar -->
-      <aside aria-label="Accessibility settings" class="a11y-toolbar">
-        <div class="a11y-group">
-          <button id="btn-simple-mode" class="a11y-btn" aria-pressed="false" onclick="toggleSimpleMode()">
-            ✨ Simple Mode: OFF
-          </button>
-          <button id="btn-read-aloud" class="a11y-btn" onclick="toggleReadAloud()" aria-label="Read screen aloud">
-            🔊 Read Aloud
-          </button>
-        </div>
+    <header class="topbar">
+      <div class="breadcrumb">MoneyMate <span>/</span> <span id="current-section">Home</span></div>
+      <div class="topbar-right"><span class="today-label" id="today-label"></span><span class="avatar" aria-label="Demo user">M</span></div>
+    </header>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
 
-        <div class="a11y-group">
-          <div role="group" aria-label="Font size controls" style="display: flex; align-items: center; gap: 4px;">
-            <button class="a11y-btn" onclick="adjustFontSize(-10)" aria-label="Decrease text size">A-</button>
-            <span id="font-size-label" class="font-indicator">100%</span>
-            <button class="a11y-btn" onclick="adjustFontSize(10)" aria-label="Increase text size up to 200%">A+</button>
+    <section class="screen is-visible" id="home-screen" aria-labelledby="home-title">
+      <div class="page-heading">
+        <div><p class="eyebrow">YOUR FINANCIAL SNAPSHOT</p><h1 id="home-title">A little more <em>in balance.</em></h1><p class="page-subtitle">Your recent money activity, all in one place.</p></div>
+        <button class="button button-primary" data-go="upload">＋ Add transactions</button>
+      </div>
+      <div class="stat-grid" aria-label="Financial summary">
+        <article class="stat-card stat-highlight"><span class="stat-label">Total spent <span id="home-spend-month"></span></span><strong id="home-spend" class="stat-value">—</strong><span class="stat-foot">From your saved transactions</span><span class="stat-decoration">↗</span></article>
+        <article class="stat-card"><span class="stat-label">Transactions</span><strong id="home-transactions" class="stat-value">—</strong><span class="stat-foot">Across your history</span></article>
+        <article class="stat-card stat-attention"><span class="stat-label">Needs a quick look</span><strong id="home-review" class="stat-value">—</strong><span class="stat-foot">Suggestions waiting for you</span></article>
+      </div>
+      <div class="quick-log-bar" aria-label="Quick manual transaction logging">
+        <span style="font-size:11px;font-weight:600;color:var(--muted)">Quick entry:</span>
+        <button type="button" onclick="quickAddTransaction('Food',100)" class="quick-log-btn">🍕 Food ₹100</button>
+        <button type="button" onclick="quickAddTransaction('Travel',50)" class="quick-log-btn">🚌 Travel ₹50</button>
+        <button type="button" onclick="quickAddTransaction('Groceries',500)" class="quick-log-btn">🛒 Grocery ₹500</button>
+        <button type="button" onclick="quickAddTransaction('Bills',200)" class="quick-log-btn">💡 Bills ₹200</button>
+      </div>
+      <div class="content-grid" style="margin-top:20px">
+        <section class="panel recent-panel" aria-labelledby="recent-title">
+          <div class="panel-heading"><div><p class="eyebrow">LATEST ACTIVITY</p><h2 id="recent-title">Recent transactions</h2></div><button class="text-link" data-go="history">View all →</button></div>
+          <div id="home-recent" class="transaction-list"><p class="loading-state">Loading your activity…</p></div>
+        </section>
+        <aside class="panel side-panel">
+          <div class="panel-heading"><div><p class="eyebrow">A FRIENDLY NUDGE</p><h2>Small steps count.</h2></div><span class="round-icon">✳</span></div>
+          <p class="nudge-copy">A quick review helps MoneyMate learn what matters to you. Your corrections make future suggestions more useful.</p>
+          <button class="button button-secondary" data-go="review">Review suggestions →</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="screen" id="upload-screen" aria-labelledby="upload-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">START WITH A STATEMENT</p><h1 id="upload-title">Bring it <em>all together.</em></h1><p class="page-subtitle">Upload one bank CSV. We’ll keep only the date, description, and amount.</p></div></div>
+      <div class="upload-layout">
+        <section class="panel upload-panel">
+          <div id="drop-zone" class="drop-zone" tabindex="0" role="group" aria-label="Choose a CSV file or drop it here">
+            <span class="upload-icon">↥</span><h2>Drop your CSV here</h2><p>or choose a file from your device</p>
+            <button class="button button-primary" id="choose-file" type="button">Choose CSV</button>
+            <input id="csv-file" type="file" accept=".csv,text/csv" aria-label="Choose bank CSV file" hidden>
+            <p class="file-hint">CSV only · up to 5 MB · 1,000 transactions</p>
           </div>
-
-          <button id="btn-contrast" class="a11y-btn" onclick="toggleHighContrast()" aria-label="Toggle high contrast colors">
-            🌗 Contrast
-          </button>
-
-          <select id="lang-selector" onchange="changeLanguage(this.value)" aria-label="Interface language" class="a11y-select">
-            <option value="en">English</option>
-            <option value="hi">हिंदी (Hindi)</option>
-            <option value="mr">मराठी (Marathi)</option>
-            <option value="kn">कन्नड (Kannada)</option>
-          </select>
-        </div>
-      </aside>
-
-      <header class="topbar">
-        <div class="breadcrumb">MoneyMate <span aria-hidden="true">/</span> <span id="current-section">Home</span></div>
-        <div class="topbar-right"><span class="today-label" id="today-label"></span><span class="avatar" aria-label="Demo user">M</span></div>
-      </header>
-      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
-
-      <section class="screen is-visible" id="home-screen" aria-labelledby="home-title">
-        <div class="page-heading">
-          <div><p class="eyebrow">YOUR FINANCIAL SNAPSHOT</p><h1 id="home-title">A little more <em>in balance.</em></h1><p class="page-subtitle">Your recent money activity, all in one place.</p></div>
-          <button class="button button-primary" data-go="upload"><span aria-hidden="true">＋</span> Add transactions</button>
-        </div>
-        <div class="stat-grid" aria-label="Financial summary">
-          <article class="stat-card stat-highlight"><span class="stat-label">Total spent <span id="home-spend-month"></span></span><strong id="home-spend" class="stat-value">—</strong><span class="stat-foot">From your saved transactions</span><span class="stat-decoration" aria-hidden="true">↗</span></article>
-          <article class="stat-card"><span class="stat-label">Transactions</span><strong id="home-transactions" class="stat-value">—</strong><span class="stat-foot">Across your history</span></article>
-          <article class="stat-card stat-attention"><span class="stat-label">Needs a quick look</span><strong id="home-review" class="stat-value">—</strong><span class="stat-foot">Suggestions waiting for you</span></article>
-        </div>
-
-        <!-- Quick One-Tap Entry Bar for Low-Tech / Elderly Users -->
-        <div class="quick-log-bar" aria-label="Quick manual transaction logging">
-          <span style="font-size: 11px; font-weight: 600; color: var(--muted); align-self: center;">Quick entry:</span>
-          <button type="button" onclick="quickAddTransaction('Food', 100)" class="quick-log-btn">🍕 Food ₹100</button>
-          <button type="button" onclick="quickAddTransaction('Travel', 50)" class="quick-log-btn">🚌 Travel ₹50</button>
-          <button type="button" onclick="quickAddTransaction('Groceries', 500)" class="quick-log-btn">🛒 Grocery ₹500</button>
-          <button type="button" onclick="quickAddTransaction('Bills', 200)" class="quick-log-btn">💡 Bills ₹200</button>
-        </div>
-
-        <div class="content-grid" style="margin-top: 20px;">
-          <section class="panel recent-panel" aria-labelledby="recent-title">
-            <div class="panel-heading"><div><p class="eyebrow">LATEST ACTIVITY</p><h2 id="recent-title">Recent transactions</h2></div><button class="text-link" data-go="history">View all <span aria-hidden="true">→</span></button></div>
-            <div id="home-recent" class="transaction-list"><p class="loading-state">Loading your activity…</p></div>
-          </section>
-          <aside class="panel side-panel">
-            <div class="panel-heading"><div><p class="eyebrow">A FRIENDLY NUDGE</p><h2>Small steps count.</h2></div><span class="round-icon" aria-hidden="true">✳</span></div>
-            <p class="nudge-copy">A quick review helps MoneyMate learn what matters to you. Your corrections make future suggestions more useful.</p>
-            <button class="button button-secondary" data-go="review">Review suggestions <span aria-hidden="true">→</span></button>
-          </aside>
-        </div>
-      </section>
-
-      <section class="screen" id="upload-screen" aria-labelledby="upload-title" hidden>
-        <div class="page-heading"><div><p class="eyebrow">START WITH A STATEMENT</p><h1 id="upload-title">Bring it <em>all together.</em></h1><p class="page-subtitle">Upload one bank CSV. We’ll keep only the date, description, and amount.</p></div></div>
-        <div class="upload-layout">
-          <section class="panel upload-panel">
-            <div id="drop-zone" class="drop-zone" tabindex="0" role="group" aria-label="Choose a CSV file or drop it here">
-              <span class="upload-icon" aria-hidden="true">↥</span>
-              <h2>Drop your CSV here</h2><p>or choose a file from your device</p>
-              <button class="button button-primary" id="choose-file" type="button">Choose CSV</button>
-              <input id="csv-file" type="file" accept=".csv,text/csv" aria-label="Choose bank CSV file" hidden>
-              <p class="file-hint">CSV only · up to 5 MB · 1,000 transactions</p>
-            </div>
-            <div class="upload-progress" id="upload-progress" hidden>
-              <div class="progress-copy"><span id="progress-label">Preparing your file…</span><span id="progress-percent">0%</span></div>
-              <div class="progress-track" role="progressbar" aria-label="CSV upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
-            </div>
-            <div class="upload-result" id="upload-result" role="status" aria-live="polite" hidden></div>
-            <div class="mapping-panel" id="mapping-panel" hidden>
-              <div><p class="eyebrow">ONE QUICK SETUP</p><h2>Match your columns</h2><p class="muted">We couldn’t recognize the headers automatically. Choose the columns that contain your transaction details.</p></div>
-              <form id="mapping-form" class="mapping-grid">
-                <label>Date column <select id="map-date" required></select></label>
-                <label>Description column <select id="map-description" required></select></label>
-                <label>Amount column <select id="map-amount"></select></label>
-                <label>Debit column <select id="map-debit"></select></label>
-                <label>Credit column <select id="map-credit"></select></label>
-                <p class="mapping-hint">Use Amount, or select Debit and/or Credit.</p>
-                <button class="button button-primary" type="submit">Retry with these columns <span aria-hidden="true">→</span></button>
-              </form>
-            </div>
-          </section>
-          <aside class="upload-aside"><div class="tip-card"><span class="round-icon" aria-hidden="true">i</span><h2>Your data stays yours.</h2><p>Only date, description, and amount are stored. Other columns in the statement are ignored.</p></div><a class="sample-link" href="sample-bank.csv" download><span aria-hidden="true">↓</span> Download a sample bank CSV</a></aside>
-        </div>
-      </section>
-
-      <section class="screen" id="review-screen" aria-labelledby="review-title" hidden>
-        <div class="page-heading"><div><p class="eyebrow">YOUR INPUT MAKES IT SMARTER</p><h1 id="review-title">A second <em>look.</em></h1><p class="page-subtitle">Confirm a suggestion or choose the category that fits best.</p></div></div>
-        <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">NEEDS YOUR ATTENTION</p><h2>Review queue</h2></div><span id="queue-total" class="soft-pill">— items</span></div><div id="review-list"><p class="loading-state">Loading your review queue…</p></div></section>
-      </section>
-
-      <section class="screen" id="history-screen" aria-labelledby="history-title" hidden>
-        <div class="page-heading"><div><p class="eyebrow">EVERY LITTLE THING, ACCOUNTED FOR</p><h1 id="history-title">Your <em>activity.</em></h1><p class="page-subtitle">A complete view of the transactions you’ve shared.</p></div><button class="button button-secondary" data-go="upload">＋ Upload CSV</button></div>
-        <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">ALL TRANSACTIONS</p><h2>Transaction history</h2></div><span id="history-total" class="soft-pill">— items</span></div><div id="history-list"><p class="loading-state">Loading your transactions…</p></div></section>
-      </section>
-
-      <section class="screen" id="insights-screen" aria-labelledby="insights-title" hidden>
-        <div class="page-heading"><div><p class="eyebrow">PATTERNS, NOT PRESSURE</p><h1 id="insights-title">Your money, <em>in perspective.</em></h1><p class="page-subtitle">Category totals for a month, with up to 12 months of context.</p></div><label class="month-picker-label" for="insights-month">Month <select id="insights-month" aria-label="Choose insights month"><option value="">Loading months…</option></select></label></div>
-        <div class="insight-grid">
-          <section class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">BY CATEGORY</p><h2>Where it goes</h2></div></div><svg id="pie-chart" class="chart-svg" viewBox="0 0 260 220" role="img" aria-labelledby="pie-title pie-desc"><title id="pie-title">Spending by category</title><desc id="pie-desc">A pie chart of saved transaction totals by category.</desc></svg><div id="pie-legend" class="chart-legend"></div></section>
-          <section class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">MONTH BY MONTH</p><h2>The bigger picture</h2></div></div><svg id="bar-chart" class="chart-svg bar-chart" viewBox="0 0 520 250" role="img" aria-labelledby="bar-title bar-desc"><title id="bar-title">Monthly transaction totals</title><desc id="bar-desc">A bar chart of monthly saved transaction totals.</desc></svg></section>
-        </div>
-        <section class="panel table-panel accessible-data"><div class="panel-heading"><div><p class="eyebrow">THE NUMBERS, CLEARLY</p><h2>Accessible data table</h2></div></div><div id="insight-table"><p class="loading-state">Loading your insights…</p></div></section>
-      </section>
-
-      <section class="screen" id="budgets-screen" aria-labelledby="budgets-title" hidden>
-        <div class="page-heading"><div><p class="eyebrow">MAKE ROOM FOR WHAT MATTERS</p><h1 id="budgets-title">A plan that <em>fits.</em></h1><p class="page-subtitle">Set a weekly or monthly limit for a spending category.</p></div></div>
-        <div class="budget-layout">
-          <section class="panel budget-form-panel"><p class="eyebrow">CREATE A BUDGET</p><h2>A little intention goes a long way.</h2>
-            <form id="budget-form" class="budget-form">
-              <label for="budget-category">Category</label><select id="budget-category" required><option value="">Loading categories…</option></select>
-              <label for="budget-limit">Limit <span class="label-note">(INR)</span></label><input id="budget-limit" type="number" min="1" step="0.01" placeholder="e.g. 5,000" required>
-              <label for="budget-period">Reset period</label><select id="budget-period"><option value="monthly">Monthly</option><option value="weekly">Weekly</option></select>
-              <button class="button button-primary" type="submit">Save budget <span aria-hidden="true">→</span></button>
+          <div class="upload-progress" id="upload-progress" hidden>
+            <div class="progress-copy"><span id="progress-label">Preparing your file…</span><span id="progress-percent">0%</span></div>
+            <div class="progress-track" role="progressbar" aria-label="CSV upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
+          </div>
+          <div class="upload-result" id="upload-result" role="status" aria-live="polite" hidden></div>
+          <div class="mapping-panel" id="mapping-panel" hidden>
+            <div><p class="eyebrow">ONE QUICK SETUP</p><h2>Match your columns</h2><p class="muted">Choose the columns containing your transaction details.</p></div>
+            <form id="mapping-form" class="mapping-grid">
+              <label>Date column <select id="map-date" required></select></label>
+              <label>Description column <select id="map-description" required></select></label>
+              <label>Amount column <select id="map-amount"></select></label>
+              <label>Debit column <select id="map-debit"></select></label>
+              <label>Credit column <select id="map-credit"></select></label>
+              <p class="mapping-hint">Use Amount, or select Debit and/or Credit.</p>
+              <button class="button button-primary" type="submit">Retry with these columns →</button>
             </form>
-          </section>
-          <section class="panel budget-list-panel"><div class="panel-heading"><div><p class="eyebrow">YOUR GUARDRAILS</p><h2>Budgets</h2></div><span id="budget-total" class="soft-pill">— budgets</span></div><div id="budget-list"><p class="loading-state">Loading your budgets…</p></div></section>
+          </div>
+        </section>
+        <aside class="upload-aside"><div class="tip-card"><span class="round-icon">i</span><h2>Your data stays yours.</h2><p>Only date, description, and amount are stored. Other columns in the statement are ignored.</p></div><a class="sample-link" href="sample-bank.csv" download>↓ Download a sample bank CSV</a></aside>
+      </div>
+    </section>
+
+    <section class="screen" id="review-screen" aria-labelledby="review-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">YOUR INPUT MAKES IT SMARTER</p><h1 id="review-title">A second <em>look.</em></h1><p class="page-subtitle">Confirm a suggestion or choose the category that fits best.</p></div></div>
+      <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">NEEDS YOUR ATTENTION</p><h2>Review queue</h2></div><span id="queue-total" class="soft-pill">— items</span></div><div id="review-list"><p class="loading-state">Loading your review queue…</p></div></section>
+    </section>
+
+    <section class="screen" id="history-screen" aria-labelledby="history-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">EVERY LITTLE THING, ACCOUNTED FOR</p><h1 id="history-title">Your <em>activity.</em></h1><p class="page-subtitle">A complete view of the transactions you’ve shared.</p></div><button class="button button-secondary" data-go="upload">＋ Upload CSV</button></div>
+      <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">ALL TRANSACTIONS</p><h2>Transaction history</h2></div><span id="history-total" class="soft-pill">— items</span></div><div id="history-list"><p class="loading-state">Loading your transactions…</p></div></section>
+    </section>
+
+    <section class="screen" id="insights-screen" aria-labelledby="insights-title" hidden>
+      <div class="page-heading">
+        <div><p class="eyebrow">PATTERNS, NOT PRESSURE</p><h1 id="insights-title">Your money, <em>in perspective.</em></h1><p class="page-subtitle">Category totals for a month, with up to 12 months of context.</p></div>
+        <label class="month-picker-label" for="insights-month">Month <select id="insights-month" aria-label="Choose insights month"><option value="">Loading months…</option></select></label>
+      </div>
+      <div class="insight-grid">
+        <section class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">BY CATEGORY</p><h2>Where it goes</h2></div></div><svg id="pie-chart" class="chart-svg" viewBox="0 0 260 220" role="img" aria-labelledby="pie-title pie-desc"><title id="pie-title">Spending by category</title><desc id="pie-desc">Spending totals by category.</desc></svg><div id="pie-legend" class="chart-legend"></div></section>
+        <section class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">MONTH BY MONTH</p><h2>The bigger picture</h2></div></div><svg id="bar-chart" class="chart-svg bar-chart" viewBox="0 0 520 250" role="img" aria-labelledby="bar-title bar-desc"><title id="bar-title">Monthly transaction totals</title><desc id="bar-desc">Monthly saved transaction totals.</desc></svg></section>
+      </div>
+
+      <!-- NEW: Financial Advisor -->
+      <section class="panel table-panel advisor-panel" aria-labelledby="advisor-title" style="margin-top:20px">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">PERSONALIZED GUIDANCE</p>
+            <h2 id="advisor-title">Your Financial Advisor</h2>
+            <p class="page-subtitle">Get spending and savings suggestions using your saved transactions, budgets, and goals.</p>
+          </div>
+        </div>
+        <form id="advisor-form" class="budget-form">
+          <label for="advisor-income">Monthly income (₹)</label>
+          <input id="advisor-income" type="number" min="0" step="0.01" placeholder="e.g. 40000" required>
+          <button class="button button-primary" type="submit" id="advisor-submit">Get my suggestions →</button>
+        </form>
+        <div id="advisor-tips-container" aria-live="polite" aria-atomic="false">
+          <p class="loading-state">Enter your monthly income and request suggestions.</p>
         </div>
       </section>
-      <footer class="page-footer"><span>Made for a clearer relationship with money.</span><span>MoneyMate <span aria-hidden="true">·</span> Demo workspace</span></footer>
-    </main>
-  </div>
+
+      <section class="panel table-panel accessible-data" style="margin-top:20px"><div class="panel-heading"><div><p class="eyebrow">THE NUMBERS, CLEARLY</p><h2>Accessible data table</h2></div></div><div id="insight-table"><p class="loading-state">Loading your insights…</p></div></section>
+    </section>
+
+    <section class="screen" id="budgets-screen" aria-labelledby="budgets-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">MAKE ROOM FOR WHAT MATTERS</p><h1 id="budgets-title">A plan that <em>fits.</em></h1><p class="page-subtitle">Set a weekly or monthly limit for a spending category.</p></div></div>
+      <div class="budget-layout">
+        <section class="panel budget-form-panel"><p class="eyebrow">CREATE A BUDGET</p><h2>A little intention goes a long way.</h2>
+          <form id="budget-form" class="budget-form">
+            <label for="budget-category">Category</label><select id="budget-category" required><option value="">Loading categories…</option></select>
+            <label for="budget-limit">Limit <span class="label-note">(INR)</span></label><input id="budget-limit" type="number" min="1" step="0.01" placeholder="e.g. 5000" required>
+            <label for="budget-period">Reset period</label><select id="budget-period"><option value="monthly">Monthly</option><option value="weekly">Weekly</option></select>
+            <button class="button button-primary" type="submit">Save budget →</button>
+          </form>
+        </section>
+        <section class="panel budget-list-panel"><div class="panel-heading"><div><p class="eyebrow">YOUR GUARDRAILS</p><h2>Budgets</h2></div><span id="budget-total" class="soft-pill">— budgets</span></div><div id="budget-list"><p class="loading-state">Loading your budgets…</p></div></section>
+      </div>
+    </section>
+
+    <footer class="page-footer"><span>Made for a clearer relationship with money.</span><span>MoneyMate · Demo workspace</span></footer>
+  </main>
+</div>
 </body>
 </html>

@@ -5,9 +5,8 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
-
-from MLproject.features import prepare_features
-from MLproject.jaccard_cache import JaccardCache
+from features import prepare_features
+from jaccard_cache import JaccardCache
 
 AUTO_CATEGORIZE_THRESHOLD = 0.85
 SOFT_SUGGEST_THRESHOLD = 0.70
